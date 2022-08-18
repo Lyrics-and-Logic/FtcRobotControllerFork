@@ -103,6 +103,14 @@ public class AroundTheRoom extends LinearOpMode {
         LR = hardwareMap.get(DcMotor.class, "LR");
         RF = hardwareMap.get(DcMotor.class, "RF");
         RR = hardwareMap.get(DcMotor.class, "RR");
+        LR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
