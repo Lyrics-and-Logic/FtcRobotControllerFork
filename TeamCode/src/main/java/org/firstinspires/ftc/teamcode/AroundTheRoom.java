@@ -118,14 +118,53 @@ public class AroundTheRoom extends LinearOpMode {
         runtime.reset();
 
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+//        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+//        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        for (int i = 0; i < 10; i++) {
+            moveOneWheel(LF, DRIVE_SPEED, 120);
+            moveOneWheel(RF, DRIVE_SPEED, 120);
+            moveOneWheel(LR, DRIVE_SPEED, 120);
+            moveOneWheel(RR, DRIVE_SPEED, 120);
+        }
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);  // pause to display final telemetry message.
 
+    }
+
+    private void moveOneWheel(DcMotor wheel, double speed, double inches){
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            int target = wheel.getCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
+            wheel.setTargetPosition(target);
+
+            // Turn On RUN_TO_POSITION
+            wheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            wheel.setPower(Math.abs(speed));
+
+            telemetry.addData("Running to",  " %7d", target);
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 5.0) &&
+                    wheel.isBusy()) {
+
+                // Display it for the driver.
+                telemetry.addData("Position",  " %7d", target);
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            stopMotion();
+
+            // Turn off RUN_TO_POSITION
+            turnOff();
+            sleep(250);   // optional pause after each move.
+        }
     }
 
     /*
@@ -202,7 +241,7 @@ public class AroundTheRoom extends LinearOpMode {
     }
 
     private boolean reachedTarget(){
-        return (LF.isBusy() && RF.isBusy()) || (LR.isBusy() && RR.isBusy());
+        return (LF.isBusy() && RF.isBusy()) && (LR.isBusy() && RR.isBusy());
     }
 
 }
