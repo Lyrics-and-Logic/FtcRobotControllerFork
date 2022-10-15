@@ -62,9 +62,16 @@ public class WheelTest extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 3.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
+    static final double     DRIVE_SPEED             = 0.45;
+    static final double     TURN_SPEED              = 0.3;
+    static final int        NINETY_DEGREES       = 35;
 
+    private int degreesToInches(double degrees){
+        int magnitude = degrees < 0 ? -1 : 1;
+        double factor = Math.abs((int) degrees) / 90.0;
+        int inches = (int) Math.ceil(factor * NINETY_DEGREES);
+        return magnitude * inches;
+    }
 
     private void currentPosition(DcMotor leftWheel, DcMotor rightWheel) {
         // Send telemetry message to indicate successful Encoder reset
@@ -93,7 +100,14 @@ public class WheelTest extends LinearOpMode {
 //        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
         int distance = 30;
         for (int i = 0; i < 10; i++) {
-            moveForward(distance);
+//            if (i % 2 == 0)
+//                moveForward(distance);
+//            else
+//                moveBackward(distance);
+            if (i % 2 == 0)
+                turnRight(90.0);
+            else
+                turnLeft(90.0);
             sleep(5000);
         }
 
@@ -105,6 +119,27 @@ public class WheelTest extends LinearOpMode {
 
     private void moveForward(int distance){
         moveTwoWheels(RR, RF, DRIVE_SPEED, DRIVE_SPEED, -distance, distance);
+    }
+
+    private void moveBackward(int distance){
+        moveTwoWheels(LR, LF, DRIVE_SPEED, DRIVE_SPEED, distance, -distance);
+    }
+
+    private void turnLeft(double degrees){
+        int distance = degreesToInches(degrees);
+        moveTwoWheels(LF, RF, TURN_SPEED, TURN_SPEED, -distance, -distance);
+    }
+
+    private void turnRight(double degrees){
+        int distance = degreesToInches(degrees);
+        moveTwoWheels(LR, RR, TURN_SPEED, TURN_SPEED, -distance, -distance);
+    }
+
+    private void printMessage(String msg, int n){
+        telemetry.addData("", "%s", msg);
+        telemetry.update();
+        sleep(n * 1000);
+
     }
 
     private void moveTwoWheels(DcMotor leftWheel, DcMotor rightWheel, double leftSpeed, double rightSpeed,
@@ -146,6 +181,38 @@ public class WheelTest extends LinearOpMode {
         }
     }
 
+    private void moveOneWheel(DcMotor wheel, double leftSpeed, int rightInches){
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            int target = wheel.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            wheel.setTargetPosition(target);
+
+            // Turn On RUN_TO_POSITION
+            wheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            wheel.setPower(Math.abs(leftSpeed));
+
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 5.0) &&
+                    wheel.isBusy()){
+
+                // Display it for the driver.
+                //telemetry.addData("Position",  " %7d: %7d", leftTarget, rightTarget);
+                currentPosition(wheel, wheel);
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            stopMotion();
+
+            // Turn off RUN_TO_POSITION
+            turnOff();
+            sleep(250);   // optional pause after each move.
+        }
+    }
     private void turnOff() {
         LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
