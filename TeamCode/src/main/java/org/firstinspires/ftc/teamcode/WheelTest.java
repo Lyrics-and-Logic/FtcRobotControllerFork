@@ -65,6 +65,7 @@ public class WheelTest extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.45;
     static final double     TURN_SPEED              = 0.3;
     static final int        NINETY_DEGREES       = 35;
+    static final int        PRINT_MESSAGE_DELAY     = 3500; // number of milliseconds to pause after printing a message
 
     private int degreesToInches(double degrees){
         int magnitude = degrees < 0 ? -1 : 1;
@@ -100,15 +101,15 @@ public class WheelTest extends LinearOpMode {
 //        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
         int distance = 30;
         for (int i = 0; i < 10; i++) {
-//            if (i % 2 == 0)
-//                moveForward(distance);
-//            else
-//                moveBackward(distance);
-            if (i % 2 == 0)
+            if (i % 4 == 0)
+               moveForward(distance);
+            else if (i % 4 == 1)
+                moveBackward(distance);
+            else if (i % 4 == 2)
                 turnRight(90.0);
-            else
+            else if (i % 4 == 3)
                 turnLeft(90.0);
-            sleep(5000);
+//            sleep(5000);
         }
 
         telemetry.addData("Path", "Complete");
@@ -118,27 +119,34 @@ public class WheelTest extends LinearOpMode {
     }
 
     private void moveForward(int distance){
+        logMessage("move forward");
         moveTwoWheels(RR, RF, DRIVE_SPEED, DRIVE_SPEED, -distance, distance);
     }
 
     private void moveBackward(int distance){
+        logMessage("move backward");
         moveTwoWheels(LR, LF, DRIVE_SPEED, DRIVE_SPEED, distance, -distance);
     }
 
     private void turnLeft(double degrees){
         int distance = degreesToInches(degrees);
+        logMessage("turning left");
         moveTwoWheels(LF, RF, TURN_SPEED, TURN_SPEED, -distance, -distance);
     }
 
     private void turnRight(double degrees){
         int distance = degreesToInches(degrees);
-        moveTwoWheels(LR, RR, TURN_SPEED, TURN_SPEED, -distance, -distance);
+        logMessage("turning right");
+        moveTwoWheels(LR, RR, TURN_SPEED, TURN_SPEED, distance, distance);
     }
 
+    private void logMessage(String msg){
+        printMessage(msg, PRINT_MESSAGE_DELAY);
+    }
     private void printMessage(String msg, int n){
         telemetry.addData("", "%s", msg);
         telemetry.update();
-        sleep(n * 1000);
+        sleep(n);
 
     }
 
