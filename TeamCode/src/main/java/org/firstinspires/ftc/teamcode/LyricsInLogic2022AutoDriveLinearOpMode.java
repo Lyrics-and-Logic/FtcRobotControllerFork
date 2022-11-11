@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -37,17 +36,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 
-@Autonomous(name = "WheelTest")
-public class WheelTest extends LinearOpMode {
+abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMode {
 
     // Declare OpMode members.
-    final private ElapsedTime runtime = new ElapsedTime();
+    final protected ElapsedTime runtime = new ElapsedTime();
     private DcMotor LF;
     private DcMotor RF;
     private DcMotor LR;
     private DcMotor RR;
 
-    public WheelTest() {
+    public LyricsInLogic2022AutoDriveLinearOpMode() {
     }
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
@@ -64,8 +62,8 @@ public class WheelTest extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.45;
     static final double     TURN_SPEED              = 0.3;
-    static final int        NINETY_DEGREES       = 35;
-    static final int        PRINT_MESSAGE_DELAY     = 3500; // number of milliseconds to pause after printing a message
+    static final int        NINETY_DEGREES       = 34;
+    static final int        PRINT_MESSAGE_DELAY     = 1000; // number of milliseconds to pause after printing a message
 
     private int degreesToInches(double degrees){
         int magnitude = degrees < 0 ? -1 : 1;
@@ -74,7 +72,7 @@ public class WheelTest extends LinearOpMode {
         return magnitude * inches;
     }
 
-    private void currentPosition(DcMotor leftWheel, DcMotor rightWheel) {
+    protected void currentPosition(DcMotor leftWheel, DcMotor rightWheel) {
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Position ", "%7d :%7d",
                 leftWheel.getCurrentPosition(),
@@ -82,75 +80,58 @@ public class WheelTest extends LinearOpMode {
         telemetry.update();
     }
 
-    @Override
-    public void runOpMode() {
+    protected void currentPosition() {
+        // Send telemetry message to indicate successful Encoder reset
+        telemetry.addData("Position ", "%7d :%7d",
+                LR.getCurrentPosition(),
+                LF.getCurrentPosition());
+        telemetry.update();
+    }
+
+    protected void initHardwareMap(){
         LF = hardwareMap.get(DcMotor.class, "LF");
         LR = hardwareMap.get(DcMotor.class, "LR");
         RF = hardwareMap.get(DcMotor.class, "RF");
         RR = hardwareMap.get(DcMotor.class, "RR");
+
         resetEncoder();
-        currentPosition(LR, LF);
-
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
-
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-//        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-//        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        int distance = 30;
-        for (int i = 0; i < 10; i++) {
-            if (i % 4 == 0)
-               moveForward(distance);
-            else if (i % 4 == 1)
-                moveBackward(distance);
-            else if (i % 4 == 2)
-                turnRight(90.0);
-            else if (i % 4 == 3)
-                turnLeft(90.0);
-//            sleep(5000);
-        }
-
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-        sleep(1000);  // pause to display final telemetry message.
-
     }
 
-    private void moveForward(int distance){
+
+
+    protected void moveForward(int distance){
         logMessage("move forward");
         moveTwoWheels(RR, RF, DRIVE_SPEED, DRIVE_SPEED, -distance, distance);
     }
 
-    private void moveBackward(int distance){
+    protected void moveBackward(int distance){
         logMessage("move backward");
         moveTwoWheels(LR, LF, DRIVE_SPEED, DRIVE_SPEED, distance, -distance);
     }
 
-    private void turnLeft(double degrees){
+    protected void turnLeft(double degrees){
         int distance = degreesToInches(degrees);
         logMessage("turning left");
         moveTwoWheels(LF, RF, TURN_SPEED, TURN_SPEED, -distance, -distance);
     }
 
-    private void turnRight(double degrees){
+    protected void turnRight(double degrees){
         int distance = degreesToInches(degrees);
         logMessage("turning right");
         moveTwoWheels(LR, RR, TURN_SPEED, TURN_SPEED, distance, distance);
     }
 
-    private void logMessage(String msg){
+    protected void logMessage(String msg){
         printMessage(msg, PRINT_MESSAGE_DELAY);
     }
-    private void printMessage(String msg, int n){
+    protected void printMessage(String msg, int n){
         telemetry.addData("", "%s", msg);
         telemetry.update();
         sleep(n);
 
     }
 
-    private void moveTwoWheels(DcMotor leftWheel, DcMotor rightWheel, double leftSpeed, double rightSpeed,
+    protected void moveTwoWheels(DcMotor leftWheel, DcMotor rightWheel, double leftSpeed, double rightSpeed,
                                int leftInches,
                                int rightInches){
         if (opModeIsActive()) {
@@ -189,7 +170,7 @@ public class WheelTest extends LinearOpMode {
         }
     }
 
-    private void moveOneWheel(DcMotor wheel, double leftSpeed, int rightInches){
+    protected void moveOneWheel(DcMotor wheel, double leftSpeed, int rightInches){
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
@@ -221,25 +202,25 @@ public class WheelTest extends LinearOpMode {
             sleep(250);   // optional pause after each move.
         }
     }
-    private void turnOff() {
+    protected void turnOff() {
         LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         LR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private boolean reachedTarget(DcMotor frontWheel, DcMotor rearWheel){
+    protected boolean reachedTarget(DcMotor frontWheel, DcMotor rearWheel){
         return (frontWheel.isBusy() && rearWheel.isBusy());
     }
 
-    private void stopMotion() {
+    protected void stopMotion() {
         LR.setPower(0);
         RR.setPower(0);
         LF.setPower(0);
         RF.setPower(0);
     }
 
-    private void resetEncoder() {
+    protected void resetEncoder() {
         LR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
