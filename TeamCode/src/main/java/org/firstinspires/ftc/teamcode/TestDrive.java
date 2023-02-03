@@ -45,10 +45,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "AutoDriveDemo2022")
-public class AutoDriveDemo2022 extends LyricsInLogic2022AutoDriveLinearOpMode {
+@Autonomous(name = "TestDrive")
+public class TestDrive extends LyricsInLogic2022AutoDriveLinearOpMode {
 
-    public AutoDriveDemo2022() {
+    public TestDrive() {
     }
 
     @Override
@@ -59,40 +59,23 @@ public class AutoDriveDemo2022 extends LyricsInLogic2022AutoDriveLinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+        while(true) {
 
-        // Distance of one block
-        int distance = 26;
+            // Distance of one block
+            int distance = 5;
 
-        // Distance of one block moving backward
-        int backwardDistance = distance + 2;
+            // Distance of one block moving backward
+            int backwardDistance = distance + 2;
 
-        // Go forward two blocks
-        moveForward(distance);
-        // Turn right
-        turnRight(90.0);
+            // Go forward two blocks
+            moveForward(distance);
+            sleep(1000);  // pause to display final telemetry message.
+            currentPosition();
 
-        // Go forward three blocks
-        moveForward(distance * 3);
-
-        // Go back one
-        moveBackward(distance);
-
-        // Turn left
-        turnLeft(90.0);
-
-        // Go forward two blocks
-        moveForward(distance * 2);
-
-        // Turn left
-        turnLeft(90.0);
-
-        // Go forward two blocks
-        moveForward(distance);
-
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-        sleep(1000);  // pause to display final telemetry message.
-
+            moveBackward(distance);
+            sleep(1000);  // pause to display final telemetry message.
+            currentPosition();
+        }
     }
 
 }

@@ -48,8 +48,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "AroundTheRoom")
-public class AroundTheRoom extends LinearOpMode {
+@Autonomous(name = "WheelTest")
+public class WheelTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -58,7 +58,7 @@ public class AroundTheRoom extends LinearOpMode {
     private DcMotor LR;
     private DcMotor RR;
 
-    public AroundTheRoom() {
+    public WheelTest() {
     }
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
@@ -97,19 +97,20 @@ public class AroundTheRoom extends LinearOpMode {
 
     private void currentPosition() {
         // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Starting at", "%7d :%7d",
-                LR.getCurrentPosition(),
-                RF.getCurrentPosition());
+        telemetry.addData("%s", "LF=" + LF.getCurrentPosition() +
+                " RF=" + RF.getCurrentPosition() +
+                " LR=" + LR.getCurrentPosition() +
+                " RR=" + RR.getCurrentPosition());
         telemetry.update();
     }
 
 
     @Override
     public void runOpMode() {
-        LF = hardwareMap.get(DcMotor.class, "LF");
-        LR = hardwareMap.get(DcMotor.class, "LR");
-        RF = hardwareMap.get(DcMotor.class, "RF");
-        RR = hardwareMap.get(DcMotor.class, "RR");
+        LF = hardwareMap.get(DcMotor.class, "RR");
+        LR = hardwareMap.get(DcMotor.class, "RF");
+        RF = hardwareMap.get(DcMotor.class, "LR");
+        RR = hardwareMap.get(DcMotor.class, "LF");
         resetEncoder();
         currentPosition();
 
@@ -154,7 +155,7 @@ public class AroundTheRoom extends LinearOpMode {
                     wheel.isBusy()) {
 
                 // Display it for the driver.
-                telemetry.addData("Position",  " %7d", target);
+                currentPosition();
                 telemetry.update();
             }
 

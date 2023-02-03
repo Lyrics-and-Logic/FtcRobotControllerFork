@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -46,6 +47,7 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
     private DcMotor RR;
 
     public LyricsInLogic2022AutoDriveLinearOpMode() {
+
     }
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
@@ -57,13 +59,12 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
     static final double     COUNTS_PER_MOTOR_REV    = 537.6; // Ticks per revolution from
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 3.0 ;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_INCHES   = 3.779528 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.45;
+    static final double     DRIVE_SPEED             = 0.05;
     static final double     TURN_SPEED              = 0.3;
     static final int        NINETY_DEGREES       = 34;
-    static final int        PRINT_MESSAGE_DELAY     = 1000; // number of milliseconds to pause after printing a message
 
     private int degreesToInches(double degrees){
         int magnitude = degrees < 0 ? -1 : 1;
@@ -78,51 +79,108 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
                 leftWheel.getCurrentPosition(),
                 rightWheel.getCurrentPosition());
         telemetry.update();
+
     }
 
     protected void currentPosition() {
         // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Position ", "%7d :%7d",
-                LR.getCurrentPosition(),
-                LF.getCurrentPosition());
+        telemetry.addData("%s", "LF=" + LF.getCurrentPosition() +
+                " RF=" + RF.getCurrentPosition() +
+                " LR=" + LR.getCurrentPosition() +
+                " RR=" + RR.getCurrentPosition());
         telemetry.update();
     }
 
     protected void initHardwareMap(){
-        LF = hardwareMap.get(DcMotor.class, "LF");
-        LR = hardwareMap.get(DcMotor.class, "LR");
-        RF = hardwareMap.get(DcMotor.class, "RF");
-        RR = hardwareMap.get(DcMotor.class, "RR");
+        LF = hardwareMap.get(DcMotor.class, "RR");
+        LR = hardwareMap.get(DcMotor.class, "RF");
+        RF = hardwareMap.get(DcMotor.class, "LR");
+        RR = hardwareMap.get(DcMotor.class, "LF");
+
+//        LF.setDirection(DcMotorSimple.Direction.REVERSE);
+//        LR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         resetEncoder();
     }
 
-
+    protected int getPrintMessageDelay(){
+        return 750;
+    }
 
     protected void moveForward(int distance){
         logMessage("move forward");
-        moveTwoWheels(RR, RF, DRIVE_SPEED, DRIVE_SPEED, -distance, distance);
+        moveFourWheels(LF, 1, RF, 1,
+                LR, 1, RR, 1,
+                DRIVE_SPEED, distance);
     }
 
     protected void moveBackward(int distance){
         logMessage("move backward");
-        moveTwoWheels(LR, LF, DRIVE_SPEED, DRIVE_SPEED, distance, -distance);
+        moveFourWheels(LF, -1, RF, -1,
+                LR, -1, RR, -1,
+                DRIVE_SPEED, -distance);
+    }
+
+    protected void moveLeft(int distance){
+        logMessage("move left");
+        moveFourWheels(LF, -1, RF, 1,
+                LR, 1, RR, -1,
+                DRIVE_SPEED, distance);
+    }
+
+    protected void moveRight(int distance){
+        logMessage("move left");
+        moveFourWheels(LF, 1, RF, -1,
+                LR, -1, RR, 1,
+                DRIVE_SPEED, distance);
+    }
+
+    protected void leftForwardDiag(int distance){
+        logMessage("move left forward diag");
+        moveFourWheels(LF, 0, RF, 1,
+                LR, 1, RR, 0,
+                DRIVE_SPEED, distance);
+    }
+
+    protected void rightForwardDiag(int distance){
+        logMessage("move right forward diag");
+        moveFourWheels(LF, 1, RF, 0,
+                LR, 0, RR, 1,
+                DRIVE_SPEED, distance);
+    }
+
+    protected void leftBackwardDiag(int distance){
+        logMessage("move left backward diag");
+        moveFourWheels(LF, -1, RF, 0,
+                LR, 0, RR, -1,
+                DRIVE_SPEED, distance);
+    }
+
+    protected void rightBackwardDiag(int distance){
+        logMessage("move left backward diag");
+        moveFourWheels(LF, 0, RF, -1,
+                LR, -1, RR, 0,
+                DRIVE_SPEED, distance);
     }
 
     protected void turnLeft(double degrees){
         int distance = degreesToInches(degrees);
         logMessage("turning left");
-        moveTwoWheels(LF, RF, TURN_SPEED, TURN_SPEED, -distance, -distance);
+        moveFourWheels(LF, -1, RF, 1,
+                LR, -1, RR, 1,
+                DRIVE_SPEED, distance);
     }
 
     protected void turnRight(double degrees){
         int distance = degreesToInches(degrees);
         logMessage("turning right");
-        moveTwoWheels(LR, RR, TURN_SPEED, TURN_SPEED, distance, distance);
+        moveFourWheels(LF, 1, RF, -1,
+                LR, 1, RR, -1,
+                DRIVE_SPEED, distance);
     }
 
     protected void logMessage(String msg){
-        printMessage(msg, PRINT_MESSAGE_DELAY);
+        printMessage(msg, getPrintMessageDelay());
     }
     protected void printMessage(String msg, int n){
         telemetry.addData("", "%s", msg);
@@ -131,77 +189,65 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
 
     }
 
-    protected void moveTwoWheels(DcMotor leftWheel, DcMotor rightWheel, double leftSpeed, double rightSpeed,
-                               int leftInches,
-                               int rightInches){
+    protected void setTargetPosition(DcMotor wheel, double distance, int direction){
+        if (direction == 0)
+            return;
+        int targetPosition = wheel.getCurrentPosition() + (int)(distance * COUNTS_PER_INCH * direction);
+        wheel.setTargetPosition(targetPosition);
+    }
+
+    protected void moveFourWheels(DcMotor leftFrontWheel,
+                                  int leftFrontDirection,
+                                  DcMotor rightFrontWheel,
+                                  int rightFrontDirection,
+                                  DcMotor leftRearWheel,
+                                  int leftRearDirection,
+                                  DcMotor rightRearWheel,
+                                  int rightRearDirection,
+                                  double power,
+                                  double distance){
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            int rightTarget = rightWheel.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            int leftTarget = leftWheel.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            rightWheel.setTargetPosition(rightTarget);
-            leftWheel.setTargetPosition(leftTarget);
+            setTargetPosition(leftFrontWheel, distance, leftFrontDirection);
+            setTargetPosition(rightFrontWheel, distance, rightFrontDirection);
+            setTargetPosition(leftRearWheel, distance, leftRearDirection);
+            setTargetPosition(rightRearWheel, distance, rightRearDirection);
+
+            currentPosition();
 
             // Turn On RUN_TO_POSITION
-            rightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftFrontWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightFrontWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftRearWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightRearWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            rightWheel.setPower(Math.abs(rightSpeed));
-            leftWheel.setPower(Math.abs(leftSpeed));
+            leftFrontWheel.setPower(power * leftFrontDirection != 0 ? 1 : 0);
+            rightFrontWheel.setPower(power * rightFrontDirection != 0 ? 1 : 0);
+            leftRearWheel.setPower(power * leftRearDirection != 0 ? 1 : 0);
+            rightRearWheel.setPower(power * rightRearDirection != 0 ? 1 : 0);
 
+            int i = 0;
             while (opModeIsActive() &&
-                    (runtime.seconds() < 5.0) &&
-                    reachedTarget(rightWheel, leftWheel)){
-
+                    //(runtime.seconds() < 5.0) &&
+                    reachedTarget(leftFrontWheel)){
                 // Display it for the driver.
-                //telemetry.addData("Position",  " %7d: %7d", leftTarget, rightTarget);
-                currentPosition(leftWheel, rightWheel);
-                telemetry.update();
+                currentPosition();
             }
 
             // Stop all motion;
             stopMotion();
+            currentPosition();
 
             // Turn off RUN_TO_POSITION
             turnOff();
             sleep(250);   // optional pause after each move.
+            logMessage("Done");
         }
     }
 
-    protected void moveOneWheel(DcMotor wheel, double leftSpeed, int rightInches){
-        if (opModeIsActive()) {
-
-            // Determine new target position, and pass to motor controller
-            int target = wheel.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            wheel.setTargetPosition(target);
-
-            // Turn On RUN_TO_POSITION
-            wheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            wheel.setPower(Math.abs(leftSpeed));
-
-            while (opModeIsActive() &&
-                    (runtime.seconds() < 5.0) &&
-                    wheel.isBusy()){
-
-                // Display it for the driver.
-                //telemetry.addData("Position",  " %7d: %7d", leftTarget, rightTarget);
-                currentPosition(wheel, wheel);
-                telemetry.update();
-            }
-
-            // Stop all motion;
-            stopMotion();
-
-            // Turn off RUN_TO_POSITION
-            turnOff();
-            sleep(250);   // optional pause after each move.
-        }
-    }
     protected void turnOff() {
         LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -209,8 +255,8 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
         RR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    protected boolean reachedTarget(DcMotor frontWheel, DcMotor rearWheel){
-        return (frontWheel.isBusy() && rearWheel.isBusy());
+    protected boolean reachedTarget(DcMotor wheel){
+        return wheel.isBusy();
     }
 
     protected void stopMotion() {
