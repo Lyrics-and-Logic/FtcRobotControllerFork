@@ -63,35 +63,10 @@ public class AutoDriveDemo2022 extends LyricsInLogic2022AutoDriveLinearOpMode {
         // Distance of one block
         int distance = 26;
 
-        // Distance of one block moving backward
-        int backwardDistance = distance + 2;
-
-        // Go forward two blocks
         moveForward(distance);
-        // Turn right
-        turnRight(90.0);
-
-        // Go forward three blocks
-        moveForward(distance * 3);
-
-        // Go back one
-        moveBackward(distance);
-
-        // Turn left
-        turnLeft(90.0);
-
-        // Go forward two blocks
-        moveForward(distance * 2);
-
-        // Turn left
-        turnLeft(90.0);
-
-        // Go forward two blocks
-        moveForward(distance);
-
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-        sleep(1000);  // pause to display final telemetry message.
+       moveRight(distance);
+       moveBackward(distance);
+        moveLeft(distance);
 
     }
 

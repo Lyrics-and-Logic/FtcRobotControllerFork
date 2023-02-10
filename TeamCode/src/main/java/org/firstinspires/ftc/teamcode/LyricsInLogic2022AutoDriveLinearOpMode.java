@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 
 
@@ -45,6 +45,8 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
     private DcMotor RF;
     private DcMotor LR;
     private DcMotor RR;
+
+    private ColorSensor colorSensor;
 
     public LyricsInLogic2022AutoDriveLinearOpMode() {
 
@@ -71,6 +73,7 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
         double factor = Math.abs((int) degrees) / 90.0;
         int inches = (int) Math.ceil(factor * NINETY_DEGREES);
         return magnitude * inches;
+
     }
 
     protected void currentPosition(DcMotor leftWheel, DcMotor rightWheel) {
@@ -96,6 +99,8 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
         LR = hardwareMap.get(DcMotor.class, "RF");
         RF = hardwareMap.get(DcMotor.class, "LR");
         RR = hardwareMap.get(DcMotor.class, "LF");
+
+//        colorSensor = hardwareMap.colorSensor.get("color");
 
 //        LF.setDirection(DcMotorSimple.Direction.REVERSE);
 //        LR.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -231,8 +236,8 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
 
             int i = 0;
             while (opModeIsActive() &&
-                    //(runtime.seconds() < 5.0) &&
-                    reachedTarget(leftFrontWheel)){
+                    (runtime.seconds() < 5.0) &&
+                    isBusy()){
                 // Display it for the driver.
                 currentPosition();
             }
@@ -255,8 +260,8 @@ abstract public class LyricsInLogic2022AutoDriveLinearOpMode extends LinearOpMod
         RR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    protected boolean reachedTarget(DcMotor wheel){
-        return wheel.isBusy();
+    protected boolean isBusy(){
+        return LF.isBusy() || RF.isBusy() || LR.isBusy() || RR.isBusy();
     }
 
     protected void stopMotion() {

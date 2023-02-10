@@ -33,24 +33,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.lang.Math;
 
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- * <p>
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- * <p>
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
 
-@Autonomous(name = "WheelTest")
-public class WheelTest extends LinearOpMode {
+@Autonomous(name = "WheelTest2")
+public class WheelTest2 extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -59,11 +46,7 @@ public class WheelTest extends LinearOpMode {
     private DcMotor LR;
     private DcMotor RR;
 
-    public WheelTest() {
-//        LF = hardwareMap.get(DcMotor.class, "RR");
-//        LR = hardwareMap.get(DcMotor.class, "RF");
-//        RF = hardwareMap.get(DcMotor.class, "LR");
-//        RR = hardwareMap.get(DcMotor.class, "LF");
+    public WheelTest2() {
     }
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
@@ -81,14 +64,6 @@ public class WheelTest extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
 
-
-    private void stopMotion() {
-        LR.setPower(0);
-        RR.setPower(0);
-        LF.setPower(0);
-        RF.setPower(0);
-    }
-
     private void resetEncoder() {
         LR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -100,47 +75,33 @@ public class WheelTest extends LinearOpMode {
         RF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void currentPosition(int target) {
+    private void currentPosition() {
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("%s", "LF=" + LF.getCurrentPosition() +
                 " RF=" + RF.getCurrentPosition() +
                 " LR=" + LR.getCurrentPosition() +
-                " RR=" + RR.getCurrentPosition() +
-                " target=" + target);
-        telemetry.update();
-    }
-
-    private void currentPosition(DcMotor wheel, int delta) {
-        // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("%s", "Motor=" + wheel.getCurrentPosition() +
-                " delta=" + delta);
+                " RR=" + RR.getCurrentPosition());
         telemetry.update();
     }
 
 
     @Override
     public void runOpMode() {
-        LF = hardwareMap.get(DcMotor.class, "LF");
-        LR = hardwareMap.get(DcMotor.class, "LR");
-        RF = hardwareMap.get(DcMotor.class, "RF");
-        RR = hardwareMap.get(DcMotor.class, "RR");
+        LF = hardwareMap.get(DcMotor.class, "RR");
+        LR = hardwareMap.get(DcMotor.class, "RF");
+        RF = hardwareMap.get(DcMotor.class, "LR");
+        RR = hardwareMap.get(DcMotor.class, "LF");
         resetEncoder();
-        currentPosition(0);
+        currentPosition();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-//        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-//        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        for (int i = 0; i < 10; i++) {
-            moveOneWheel(LF, DRIVE_SPEED, 120);
-            moveOneWheel(RF, DRIVE_SPEED, 120);
-            moveOneWheel(LR, DRIVE_SPEED, 120);
-            moveOneWheel(RR, DRIVE_SPEED, 120);
-        }
+        moveOneWheel(LF, DRIVE_SPEED, 120);
+        moveOneWheel(RF, DRIVE_SPEED, 120);
+        moveOneWheel(LR, DRIVE_SPEED, 120);
+        moveOneWheel(RR, DRIVE_SPEED, 120);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -151,12 +112,8 @@ public class WheelTest extends LinearOpMode {
     private void moveOneWheel(DcMotor wheel, double speed, double inches){
         if (opModeIsActive()) {
 
-            //resetEncoder();
-            wheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            wheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             // Determine new target position, and pass to motor controller
-            int distance = (int)(inches * COUNTS_PER_INCH);
-            int target = wheel.getCurrentPosition() + distance;
+            int target = wheel.getCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
             wheel.setTargetPosition(target);
 
             // Turn On RUN_TO_POSITION
@@ -166,19 +123,13 @@ public class WheelTest extends LinearOpMode {
             runtime.reset();
             wheel.setPower(Math.abs(speed));
 
-
-            int delta = Math.abs(wheel.getCurrentPosition() - distance);
-            currentPosition(delta);
-            //currentPosition(wheel, delta);
             telemetry.addData("Running to",  " %7d", target);
             while (opModeIsActive() &&
-                    //(runtime.seconds() < 5.0) &&
+                    (runtime.seconds() < 5.0) &&
                     wheel.isBusy()) {
 
                 // Display it for the driver.
-                delta = Math.abs(wheel.getCurrentPosition() - distance);
-                currentPosition(delta);
-                //currentPosition(wheel, delta);
+                currentPosition();
                 telemetry.update();
             }
 
@@ -187,9 +138,12 @@ public class WheelTest extends LinearOpMode {
 
             // Turn off RUN_TO_POSITION
             turnOff();
-            telemetry.addData("%s", "We have stopped");
-            sleep(3000);   // optional pause after each move.
+            sleep(250);   // optional pause after each move.
         }
+    }
+
+    private boolean reachedTarget(){
+        return (LF.isBusy() && RF.isBusy()) && (LR.isBusy() && RR.isBusy());
     }
 
     private void turnOff() {
@@ -199,9 +153,13 @@ public class WheelTest extends LinearOpMode {
         RR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private boolean isBusy(){
-        return LF.isBusy() || RF.isBusy() || LR.isBusy() || RR.isBusy();
+    private void stopMotion() {
+        LR.setPower(0);
+        RR.setPower(0);
+        LF.setPower(0);
+        RF.setPower(0);
     }
+
 
 }
 
